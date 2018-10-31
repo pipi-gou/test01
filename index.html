@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>Examples</title>
+<meta name="description" content="">
+<meta name="keywords" content="">
+<link href="" rel="stylesheet">
+<link href="https://cdn.bootcss.com/twitter-bootstrap/4.1.3/css/bootstrap.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
+<style type="text/css">
+    .container img{
+        width: 50px;
+        height: 50px;
+    }
+</style>
+</head>
+<body>
+	<!-- 模板引擎-->
+    <div id="app">
+         <div class="container">
+         	<div class="row">
+
+         		<table class="table table-bordered table-hover">
+                    <caption class="h2 text-center text-warning" style="caption-side: top">谁谁谁</caption>
+                    <thead>
+         		<tr>
+         			<td><input type="checkbox" v-model="checkAll">全选</td>
+         			<td>商品</td>
+         			<td>单价</td>
+         			<td>数量</td>
+         			<td>小计</td>
+         			<td>操作</td>
+         		</tr>
+                </thead>
+                <tr v-for="p in products">
+                    <td><input type="checkbox"  v-model="p.isSelected" ></td>
+                    <td><img :src='p.productCover' :title="p.productName">{{p.productInfo}}</td>
+                    <td>{{p.productsPrice}}</td>
+
+                    <td><input type="number" v-model.numeber="p.productCount" min="1"></td>
+                    <td>{{p.productsPrice*p.productCount|toFixed(2)}}</td>
+                    <td><button class="btn btn-danger" @click="remove(p)">删除</button></td>
+                </tr>
+                <tr>
+                    <td colspan="6">总价:{{sum|toFixed(2)}}</td></tr>
+         		</table>
+         	</div>
+         </div>
+    </div>
+
+
+
+<script src="https://cdn.bootcss.com/vue/2.5.17-beta.0/vue.min.js"></script>
+<script type="text/javascript">
+	var vm = new Vue({
+		el:"#app",
+        computed:{
+            checkAll:{
+                get(){
+                  return this.products.every(item =>item.isSelected)
+                },
+                set(val){//val是给checkbox赋的值
+                   this.products.forEach(item=>item.isSelected=val)
+                }
+            },
+            sum(){
+        return this.products.reduce((prev,next)=>{
+                    if(next.isSelected){
+            return prev+next.productsPrice*next.productCount
+        }else{
+            return prev;
+        }
+
+    },0)
+    }
+        },
+        filters:{
+          toFixed(input,param1){
+        return '$'+input.toFixed(param1);
+    }
+        },
+		created(){
+           this.getdata();
+		},
+        methods:{
+           getdata(){
+                axios.get('./products.json')
+                .then(res=>{
+                this.products = res.data;
+
+                          },err=>{});
+
+           },
+//           change(){
+//        this.products.forEach(item=>item.isSelected=this.checkAll)
+//    },
+//    change1(){
+//        this.checkAll=this.products.every(item =>item.isSelected)
+//    },
+           remove(val){
+             return this.products = this.products.filter(item=>item!==val);
+           }
+        },
+		data:{     //数据会被vm数据代理。
+                   products:[],
+
+		}
+	})
+</script>
+</body>
+</html>
